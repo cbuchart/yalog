@@ -38,3 +38,43 @@ Other useful macros
 - `YALOG_EXPRESSION(expr)`: adds a log record (debug) for the given expression and its value.
 
 Please check the given example for more information.
+
+### Example
+
+```cpp
+#include <iostream>
+#include <string>
+
+#include "yalog.h"
+
+void foo()
+{
+    YALOG_INOUT();
+
+    YALOG_LINE();
+    YALOG_EXPRESSION(40 + 2);
+}
+
+int main()
+{
+    yalog::log_to_file("logs", "log", 128 * 1024, 32u);
+    yalog::log_to_stream(std::cout);
+
+    YALOG_INFO() << "This should not appear";
+    yalog::set_min_severity(yalog::Severity::Trace);
+
+    YALOG_TRACE() << "Test for trace, string " << "Hello world!";
+    YALOG_DEBUG() << "Test for debug, double " << 3.141592;
+    YALOG_INFO() << "Test for info, uint32_t " << 42u;
+    YALOG_WARNING() << "Test for warning";
+    YALOG_ERROR() << "Test for error";
+    YALOG_FATAL() << "Test for fatal";
+
+    foo();
+
+    return 0;
+}
+```
+
+![example_screenshot](https://user-images.githubusercontent.com/5821978/139754899-a949079f-df3d-4d66-9a8f-c25fd6d34cd9.png)
+
