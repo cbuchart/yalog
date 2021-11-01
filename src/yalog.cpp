@@ -47,10 +47,8 @@ namespace
 {
     struct Log
     {
-        boost::shared_ptr<file_sink_t> sink;
-
         logging::sources::severity_logger<yalog::Severity> logger;
-
+        boost::shared_ptr<file_sink_t> sink;
         yalog::Severity min_severity;
 
         Log()
@@ -160,8 +158,6 @@ void yalog::log_to_stream(std::ostream& os)
 // Print a message to log
 void yalog::log(Severity severity, std::string msg)
 {
-    // auto const severity_value = static_cast<std::underlying_type_t<Severity>>(severity);
-    // BOOST_LOG_SEV(s_log.logger, (logging::trivial::severity_level)severity_value) << msg;
     BOOST_LOG_SEV(s_log.logger, severity) << msg;
 }
 
