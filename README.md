@@ -1,4 +1,7 @@
 # yalog
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/367476e06a8644029452da48355d8713)](https://app.codacy.com/gh/cbuchart/yalog?utm_source=github.com&utm_medium=referral&utm_content=cbuchart/yalog&utm_campaign=Badge_Grade_Settings)
+
 Yet Another Log library in C++, based on Boost.log.
 
 ## Compilation
