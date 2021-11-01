@@ -6,9 +6,11 @@ Yet Another Log library in C++, based on Boost.log.
 
 ## Compilation
 
-- `git clone https://github.com/cbuchart/yalog.git`
-- `cd yalog && mkdir build && cd build``
-- `cmake .. && make -j`
+```console
+$ git clone https://github.com/cbuchart/yalog.git
+$ cd yalog && mkdir build && cd build
+$ cmake .. && make -j
+```
 
 ## Basic usage
 
