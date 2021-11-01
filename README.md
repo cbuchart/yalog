@@ -1,5 +1,5 @@
 # yalog
-Yet Another Log library based on Boost.log
+Yet Another Log library in C++, based on Boost.log.
 
 ## Compilation
 
