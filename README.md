@@ -32,6 +32,6 @@ Example: `YALOG_DEBUG() << "This is a sample message";`
 Other useful macros
 - `YALOG_INOUT()`: adds a log record (trace) indicating function name and when reaching the end of the current scope (useful for tracing functions).
 - `YALOG_LINE()`: adds a log record (trace) indicating current filename and line number.
-- `YALOG_EXPRESSION(expr)`: adds a lof record (debug) for thre given expression and its value.
+- `YALOG_EXPRESSION(expr)`: adds a log record (debug) for the given expression and its value.
 
 Please check the given example for more information.
