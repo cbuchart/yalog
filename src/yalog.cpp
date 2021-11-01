@@ -68,10 +68,7 @@ namespace
 
         ~Log()
         {
-            if (sink) {
-                logging::core::get()->remove_sink(sink);
-                sink.reset();
-            }
+            if (sink) { logging::core::get()->remove_sink(sink); }
         }
     } s_log;
 
@@ -129,21 +126,22 @@ void yalog::log_to_file(std::string const& dir, std::string const& prefix, size_
     // Setup filename (based on timestamp) and rotation (everyday, up to a max
     // file size)
     auto backend = boost::make_shared<sinks::text_file_backend>(
-      keywords::file_name = dir + "/" + prefix + "_%Y%m%d_%H%M%S.html", keywords::rotation_size = max_file_size,
+      keywords::file_name = dir + "/" + prefix + "_%Y%m%d_%H%M%S.html",            // filename
+      keywords::rotation_size = max_file_size,                                     // maximum file size
       keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0) // rotate every day
     );
 
-    s_log.sink = boost::make_shared<file_sink_t>(backend);
-
-    s_log.sink->locked_backend()->set_file_collector(
+    backend->set_file_collector(
       sinks::file::make_collector(keywords::target = dir, keywords::max_files = max_file_count));
-    s_log.sink->locked_backend()->scan_for_files(sinks::file::scan_all);
+    backend->scan_for_files(sinks::file::scan_all);
 
     // Setup log format (HTML in this case), and messages format
     // You could add your own stylesheet here for extended decoration
-    s_log.sink->locked_backend()->auto_flush(true);
-    s_log.sink->locked_backend()->set_open_handler(boost::lambda::_1 << "<html><h1>Log</h1><ul>\n");
-    s_log.sink->locked_backend()->set_close_handler(boost::lambda::_1 << "</ul></html>\n");
+    backend->auto_flush(true);
+    backend->set_open_handler(boost::lambda::_1 << "<html><h1>Log</h1><ul>\n");
+    backend->set_close_handler(boost::lambda::_1 << "</ul></html>\n");
+
+    s_log.sink = boost::make_shared<file_sink_t>(backend);
     s_log.sink->set_formatter(&formatter<false>);
 
     logging::core::get()->add_sink(s_log.sink);
