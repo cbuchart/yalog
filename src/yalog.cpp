@@ -27,6 +27,21 @@ using file_sink_t = sinks::synchronous_sink<sinks::text_file_backend>;
 // Register some attributes to be used in the log
 BOOST_LOG_ATTRIBUTE_KEYWORD(attr_timestamp, "TimeStamp", attrs::local_clock::value_type)
 BOOST_LOG_ATTRIBUTE_KEYWORD(attr_thread_id, "ThreadID", attrs::current_thread_id::value_type)
+BOOST_LOG_ATTRIBUTE_KEYWORD(attr_severity, "Severity", yalog::Severity)
+
+namespace
+{
+    template<typename T>
+    auto to_integral(T e)
+    {
+        return static_cast<std::underlying_type_t<T>>(e);
+    }
+}
+
+bool operator>=(yalog::Severity a, yalog::Severity b)
+{
+    return to_integral(a) >= to_integral(b);
+}
 
 namespace
 {
@@ -34,23 +49,23 @@ namespace
     {
         boost::shared_ptr<file_sink_t> sink;
 
-        logging::sources::severity_logger<yalog::severity_t> logger;
+        logging::sources::severity_logger<yalog::Severity> logger;
 
-        yalog::severity_t min_severity;
+        yalog::Severity min_severity;
 
         Log()
         {
-            set_min_severity(yalog::severity_t::warning);
+            set_min_severity(yalog::Severity::Warning);
 
             // Add the attributes we want to use
             logger.add_attribute("TimeStamp", attrs::local_clock());
             logger.add_attribute("ThreadID", attrs::current_thread_id());
         }
 
-        void set_min_severity(yalog::severity_t severity)
+        void set_min_severity(yalog::Severity severity)
         {
             min_severity = severity;
-            logging::core::get()->set_filter(logging::trivial::severity >= severity);
+            logging::core::get()->set_filter(attr_severity >= severity);
         }
 
         ~Log()
@@ -79,16 +94,19 @@ namespace
           "\033[37m"s, "\033[32m"s, "\033[36m"s, "\033[33m"s, "\033[31m"s, "\033[37;41m"s,
         };
 
-        auto severity = rec[logging::trivial::severity];
-        if (severity && Console) {
-            // Colorize based on severity
-            if (static_cast<std::size_t>(severity.get()) < s_severity_colours.size()) {
-                strm << s_severity_colours[severity.get()];
-            }
-        }
+        auto severity = rec[attr_severity];
+        if (severity) {
+            auto const severity_value = to_integral(severity.get());
 
-        if (severity && static_cast<std::size_t>(severity.get()) < s_severity_labels.size()) {
-            strm << "[" << std::left << std::setw(7) << std::setfill(' ') << s_severity_labels[severity.get()] << "] ";
+            if (Console) {
+                // Colorize based on severity
+                if (severity_value < s_severity_colours.size()) { strm << s_severity_colours[severity_value]; }
+            }
+
+            if (severity_value < s_severity_labels.size()) {
+                strm << "[" << std::left << std::setw(7) << std::setfill(' ') << s_severity_labels[severity_value]
+                     << "] ";
+            }
         }
 
         // Timestamp and thread ID
@@ -140,19 +158,21 @@ void yalog::log_to_stream(std::ostream& os)
 }
 
 // Print a message to log
-void yalog::log(severity_t severity, std::string msg)
+void yalog::log(Severity severity, std::string msg)
 {
+    // auto const severity_value = static_cast<std::underlying_type_t<Severity>>(severity);
+    // BOOST_LOG_SEV(s_log.logger, (logging::trivial::severity_level)severity_value) << msg;
     BOOST_LOG_SEV(s_log.logger, severity) << msg;
 }
 
 // Sets the minimum severity to be logged, messages with a lower severity level
 // will be discarded
-void yalog::set_min_severity(severity_t severity)
+void yalog::set_min_severity(Severity severity)
 {
     s_log.set_min_severity(severity);
 }
 
-yalog::severity_t yalog::get_min_severity()
+yalog::Severity yalog::get_min_severity()
 {
     return s_log.min_severity;
 }

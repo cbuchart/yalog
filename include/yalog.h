@@ -27,12 +27,17 @@ SOFTWARE.
 #include <sstream>
 #include <string>
 
-#include <boost/log/trivial.hpp>
-
 // The core of the log system
 namespace yalog
 {
-    using severity_t = boost::log::trivial::severity_level;
+    enum class Severity : uint8_t {
+        Trace,
+        Debug,
+        Info,
+        Warning,
+        Error,
+        Fatal,
+    };
 
     // Configure log to be saved to a file
     void log_to_file(std::string const& dir, std::string const& prefix, size_t max_file_size, uint32_t max_file_count);
@@ -41,13 +46,13 @@ namespace yalog
     void log_to_stream(std::ostream& os);
 
     // Print a message to log
-    void log(severity_t severity, std::string msg);
+    void log(Severity severity, std::string msg);
 
     // Sets the minimum severity to be logged, messages with a lower severity level
     // will be discarded
-    void set_min_severity(severity_t severity);
+    void set_min_severity(Severity severity);
 
-    severity_t get_min_severity();
+    Severity get_min_severity();
 
     namespace details
     {
@@ -56,10 +61,10 @@ namespace yalog
         struct Stream
         {
             bool enabled;
-            severity_t severity;
+            Severity severity;
             std::stringstream sstr;
 
-            explicit Stream(severity_t severity) : severity{severity} { enabled = get_min_severity() <= severity; }
+            explicit Stream(Severity a_severity) : severity{a_severity} { enabled = get_min_severity() <= severity; }
 
             ~Stream()
             {
@@ -80,20 +85,20 @@ namespace yalog
         {
             const std::string name;
 
-            explicit InOut(std::string a_name) : name{std::move(a_name)} { Stream{severity_t::trace} << name << " {"; }
-            ~InOut() { Stream{severity_t::trace} << "} " << name; }
+            explicit InOut(std::string a_name) : name{std::move(a_name)} { Stream{Severity::Trace} << name << " {"; }
+            ~InOut() { Stream{Severity::Trace} << "} " << name; }
         };
     } // namespace details
 
     // Helper functions to log messages depending on severity level
-    inline auto trace() { return details::Stream{boost::log::trivial::trace}; }
-    inline auto debug() { return details::Stream{boost::log::trivial::debug}; }
-    inline auto info() { return details::Stream{boost::log::trivial::info}; }
-    inline auto warning() { return details::Stream{boost::log::trivial::warning}; }
-    inline auto error() { return details::Stream{boost::log::trivial::error}; }
-    inline auto fatal() { return details::Stream{boost::log::trivial::fatal}; }
+    inline auto trace() { return details::Stream{Severity::Trace}; }
+    inline auto debug() { return details::Stream{Severity::Debug}; }
+    inline auto info() { return details::Stream{Severity::Info}; }
+    inline auto warning() { return details::Stream{Severity::Warning}; }
+    inline auto error() { return details::Stream{Severity::Error}; }
+    inline auto fatal() { return details::Stream{Severity::Fatal}; }
     inline auto in_out(std::string name) { return details::InOut{std::move(name)}; }
-}; // namespace yalog
+} // namespace yalog
 
 // Helper macros
 #define YALOG_TRACE() yalog::trace()
@@ -104,7 +109,7 @@ namespace yalog
 #define YALOG_FATAL() yalog::fatal()
 #define YALOG_HELPER_JOIN2(x, y) x##y
 #define YALOG_HELPER_JOIN(x, y) YALOG_HELPER_JOIN2(x, y)
-#define YALOG_INOUT() auto YALOG_HELPER_JOIN(log_inout_, __LINE__) = yalog::in_out(__FUNCTION__)
+#define YALOG_INOUT() auto const YALOG_HELPER_JOIN(log_inout_, __LINE__) = yalog::in_out(__FUNCTION__)
 #define YALOG_LINE() YALOG_TRACE() << __FILE__ << "@" << __LINE__
 #define YALOG_EXPRESSION(expr) YALOG_DEBUG() << #expr << " = " << (expr);
 

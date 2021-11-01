@@ -57,7 +57,7 @@ int main()
     yalog::log_to_stream(std::cout);
 
     YALOG_INFO() << "This should not appear";
-    yalog::set_min_severity(yalog::severity_t::trace);
+    yalog::set_min_severity(yalog::Severity::Trace);
 
     YALOG_TRACE() << "Test for trace, std::string "
                   << "Hello world!"s;

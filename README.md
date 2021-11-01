@@ -15,7 +15,7 @@ Yet Another Log library in C++, based on Boost.log.
 
 - Setup log to file under `logs` directory, with logs no larger than 1MB and no more than 100 logs: `yalog::log_to_file("logs", "log", 1024 * 1024, 100);`
 - Setup log to console (standard output): `yalog::log_to_stream(std::cout);`
-- Set minimum severity level to `debug` (`warning` by default): `yalog::set_minimum_severity(yalog::severity_t::debug);`
+- Set minimum severity level to `Debug` (`Warning` by default): `yalog::set_minimum_severity(yalog::Severity::Debug);`
 
 ### Available macros
 
